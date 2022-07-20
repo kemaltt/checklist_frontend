@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import CheckList from "./CheckList";
+import CheckPointItem from "./CheckPointItem";
 
-export default function Dashboard() {
+export default function CheckPoint() {
   const [data, setData] = useState([]);
+  const navigate = useNavigate();
 
   const handleCheckList = () => {
     fetch("http://localhost:9000/dashboard")
@@ -11,34 +13,40 @@ export default function Dashboard() {
       .then((data) => setData(data));
   };
 
-  useEffect(() => {
-    handleCheckList();
-  }, []);
-
   const handleChecked = (id) => {
     fetch(`http://localhost:9000/checkedlist/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-        "Access-Control-Allow-Headers":
-          "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With",
       },
       body: JSON.stringify({
-        // id: id,
-        checked: true,
+        id: id,
       }),
     })
       .then((res) => res.json())
       .then((newData) => setData(newData));
   };
 
+  const handleReset = () => {
+    fetch("http://localhost:9000/reset", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((newData) => setData(newData));
+  };
+
+  useEffect(() => {
+    handleCheckList();
+  }, []);
+
   return (
     <div className="dashboard_container">
       {data.map((item, i) => (
         <div key={i}>
-          <CheckList
+          <CheckPointItem
             title={item.title}
             id={item.id}
             checked={item.checked}
@@ -46,6 +54,8 @@ export default function Dashboard() {
           />
         </div>
       ))}
+
+      <button onClick={handleReset}>Reset</button>
     </div>
   );
 }
